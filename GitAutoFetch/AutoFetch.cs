@@ -33,6 +33,8 @@ namespace GitAutoFetch
 
         private static Timer timerThread;
 
+        private static Config Config;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoFetch"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -67,14 +69,14 @@ namespace GitAutoFetch
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static async Task InitializeAsync(AsyncPackage package)
+        public static async Task InitializeAsync(AsyncPackage package, Config conf)
         {
             // Switch to the main thread - the call to AddCommand in AutoFetch's constructor requires
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
-
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new AutoFetch(package, commandService);
+            Config = conf;
         }
 
         /// <summary>
@@ -90,14 +92,14 @@ namespace GitAutoFetch
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
 
-                timerThread = new Timer(new TimerCallback(ExecCmd), null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(10));
+                timerThread = new Timer(new TimerCallback(ExecCmd), null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(Config.TimeValue()));
             }
             catch (Exception ex)
             {
                 VsShellUtilities.ShowMessageBox(
                     this.package,
                     ex.Message,
-                    "Error Extension - VS Git AutoFetch",
+                    "VS Git AutoFetch -> Error",
                     OLEMSGICON.OLEMSGICON_CRITICAL,
                     OLEMSGBUTTON.OLEMSGBUTTON_OK,
                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);

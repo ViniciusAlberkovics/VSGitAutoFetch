@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.Shell;
+using Newtonsoft.Json;
 using Task = System.Threading.Tasks.Task;
 
 namespace GitAutoFetch
@@ -44,10 +46,42 @@ namespace GitAutoFetch
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            // When initialized asynchronously, the current thread may be a background thread at this point.
-            // Do any initialization that requires the UI thread after switching to the UI thread.
-            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            await AutoFetch.InitializeAsync(this);
+            try
+            {
+                // When initialized asynchronously, the current thread may be a background thread at this point.
+                // Do any initialization that requires the UI thread after switching to the UI thread.
+                await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+                Config config = new Config(5, 0);
+                await this.VerifyConfigAsync(config);
+
+                await AutoFetch.InitializeAsync(this, config);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async Task VerifyConfigAsync(Config config)
+        {
+            string pathConfig = $@"C:\Users\{Environment.UserName}\Documents\VsGitAutoFetch.json";
+
+            if (File.Exists(pathConfig))
+            {
+                using (var r = new StreamReader(pathConfig))
+                {
+                    config = JsonConvert.DeserializeObject<Config>(await r.ReadToEndAsync());
+                }
+            }
+            else
+            {
+                using (var w = new StreamWriter(pathConfig))
+                {
+                    string conf = JsonConvert.SerializeObject(config, Formatting.Indented);
+                    await w.WriteAsync(conf);
+                }
+            }
         }
 
         #endregion
