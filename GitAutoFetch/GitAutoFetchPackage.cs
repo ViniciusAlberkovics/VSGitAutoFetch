@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.Shell;
-using Newtonsoft.Json;
 using Task = System.Threading.Tasks.Task;
 
 namespace GitAutoFetch
