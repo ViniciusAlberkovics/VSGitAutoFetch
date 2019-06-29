@@ -26,7 +26,7 @@ namespace GitAutoFetch
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [Guid(GitAutoFetchPackage.PackageGuidString)]
+    [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     public sealed class GitAutoFetchPackage : AsyncPackage
     {
@@ -53,34 +53,14 @@ namespace GitAutoFetch
                 await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
                 Config config = new Config(5, 0);
-                await this.VerifyConfigAsync(config);
+                await Config.VerifyConfigAsync(config);
 
                 await AutoFetch.InitializeAsync(this, config);
+                await OpenConfig.InitializeAsync(this, config);
             }
             catch (Exception ex)
             {
                 throw ex;
-            }
-        }
-
-        private async Task VerifyConfigAsync(Config config)
-        {
-            string pathConfig = $@"C:\Users\{Environment.UserName}\Documents\VsGitAutoFetch.json";
-
-            if (File.Exists(pathConfig))
-            {
-                using (var r = new StreamReader(pathConfig))
-                {
-                    config = JsonConvert.DeserializeObject<Config>(await r.ReadToEndAsync());
-                }
-            }
-            else
-            {
-                using (var w = new StreamWriter(pathConfig))
-                {
-                    string conf = JsonConvert.SerializeObject(config, Formatting.Indented);
-                    await w.WriteAsync(conf);
-                }
             }
         }
 
