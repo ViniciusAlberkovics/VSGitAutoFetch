@@ -6,7 +6,6 @@
         <Description xml:space="preserve">VS Git Auto Fetch</Description>
         <Icon>Logo.png</Icon>
         <Tags>git, autofetch, git-autofetch</Tags>
-        <Preview>true</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
