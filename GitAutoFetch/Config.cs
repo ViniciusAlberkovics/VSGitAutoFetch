@@ -8,12 +8,11 @@ namespace GitAutoFetch
 {
     public class Config
     {
-        public int DefaultTime { get; set; }
+        private const int DefaultTime = 5;
         public int UserTime { get; set; }
 
-        public Config(int defaultTime, int userTime)
+        public Config(int userTime)
         {
-            DefaultTime = defaultTime;
             UserTime = userTime;
         }
 

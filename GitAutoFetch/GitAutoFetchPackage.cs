@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using EnvDTE;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
 namespace GitAutoFetch
@@ -26,13 +28,13 @@ namespace GitAutoFetch
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideAutoLoad(UIContextGuids80.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
     public sealed class GitAutoFetchPackage : AsyncPackage
     {
         /// <summary>
         /// GitAutoFetchPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "a0b3344d-e011-4159-8052-c8eed06bc3ab";
-
         #region Package Members
 
         /// <summary>
@@ -46,20 +48,31 @@ namespace GitAutoFetch
         {
             try
             {
-                // When initialized asynchronously, the current thread may be a background thread at this point.
-                // Do any initialization that requires the UI thread after switching to the UI thread.
                 await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-                Config config = new Config(5, 0);
-                await Config.VerifyConfigAsync(config);
-
-                await AutoFetch.InitializeAsync(this, config);
-                await OpenConfig.InitializeAsync(this, config);
+                Opened();
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+        }
+        
+        protected override void Dispose(bool disposing)
+        {
+            AutoFetch.Dispose();
+            base.Dispose(disposing);
+        }
+
+        public void Opened()
+        {
+            Config config = new Config(0);
+            Task.Run(async () =>
+            {
+                await Config.VerifyConfigAsync(config);
+
+                await AutoFetch.InitializeAsync(this, config);
+                await OpenConfig.InitializeAsync(this, config);
+            });
         }
 
         #endregion

@@ -3,10 +3,8 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using Process = System.Diagnostics.Process;
 using Task = System.Threading.Tasks.Task;
 
 namespace GitAutoFetch
@@ -20,19 +18,15 @@ namespace GitAutoFetch
         /// Command ID.
         /// </summary>
         public const int CommandId = 0x0100;
-
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
         public static readonly Guid CommandSet = new Guid("1963cd03-55e3-41de-b505-6965e7873f22");
-
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
-
         private static Timer timerThread;
-
         private static Config Config;
 
         /// <summary>
@@ -92,7 +86,10 @@ namespace GitAutoFetch
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
 
-                timerThread = new Timer(new TimerCallback(ExecCmd), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Config.TimeValue()));
+                if (timerThread == null)
+                    timerThread = new Timer(new TimerCallback(ExecCmd), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Config.TimeValue()));
+                else
+                    timerThread.Change(TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Config.TimeValue()));
             }
             catch (Exception ex)
             {
@@ -104,7 +101,7 @@ namespace GitAutoFetch
                     OLEMSGBUTTON.OLEMSGBUTTON_OK,
                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
 
-                timerThread?.Dispose();
+                Dispose();
             }
         }
 
@@ -114,25 +111,21 @@ namespace GitAutoFetch
             {
                 DTE dte = await package.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) as DTE;
 
-                if (dte != null && !string.IsNullOrWhiteSpace(dte.Solution.FullName))
+                if (dte != null && dte.Solution.IsOpen)
                 {
                     string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
-
-                    string execute = $@"/C cd {solutionDir}&git fetch";
-
-                    Process.Start(new ProcessStartInfo()
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = execute,
-                        CreateNoWindow = false,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    }).WaitForExit();
+                    dte.ExecuteCommand("Team.Git.Fetch");
                 }
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+        }
+
+        public static void Dispose()
+        {
+            timerThread?.Dispose();
         }
     }
 }
