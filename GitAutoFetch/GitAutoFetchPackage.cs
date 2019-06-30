@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
-using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
@@ -37,6 +36,21 @@ namespace GitAutoFetch
         public const string PackageGuidString = "a0b3344d-e011-4159-8052-c8eed06bc3ab";
         #region Package Members
 
+        public GitAutoFetchPackage()
+        {
+            try
+            {
+                JoinableTaskFactory.RunAsync(async () =>
+                    {
+                        await InitializeAsync(this.DisposalToken, null);
+                    });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -56,23 +70,23 @@ namespace GitAutoFetch
                 throw ex;
             }
         }
-        
-        protected override void Dispose(bool disposing)
-        {
-            AutoFetch.Dispose();
-            base.Dispose(disposing);
-        }
 
         public void Opened()
         {
-            Config config = new Config(0);
-            Task.Run(async () =>
+            try
             {
-                await Config.VerifyConfigAsync(config);
-
-                await AutoFetch.InitializeAsync(this, config);
-                await OpenConfig.InitializeAsync(this, config);
-            });
+                Config config = new Config(0);
+                JoinableTaskFactory.RunAsync(async () =>
+                {
+                    await Config.VerifyConfigAsync(config);
+                    await AutoFetch.InitializeAsync(this, config);
+                    await OpenConfig.InitializeAsync(this, config);
+                });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         #endregion

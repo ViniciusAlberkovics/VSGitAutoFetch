@@ -14,9 +14,6 @@ namespace GitAutoFetch
     /// </summary>
     internal sealed class AutoFetch
     {
-        /// <summary>
-        /// Command ID.
-        /// </summary>
         public const int CommandId = 0x0100;
         /// <summary>
         /// Command menu group (command set GUID).
@@ -71,6 +68,7 @@ namespace GitAutoFetch
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new AutoFetch(package, commandService);
             Config = conf;
+            Instance.Execute(null, null);
         }
 
         /// <summary>
