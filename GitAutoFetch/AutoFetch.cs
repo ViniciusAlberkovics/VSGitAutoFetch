@@ -4,8 +4,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
 using System.IO;
-using System.Threading;
 using Task = System.Threading.Tasks.Task;
+using Thread = System.Threading.Thread;
 
 namespace GitAutoFetch
 {
@@ -23,7 +23,7 @@ namespace GitAutoFetch
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
-        private static Timer timerThread;
+        private static bool DisposeGit;
         private static Config Config;
 
         /// <summary>
@@ -84,10 +84,7 @@ namespace GitAutoFetch
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
 
-                if (timerThread == null)
-                    timerThread = new Timer(new TimerCallback(ExecCmd), null, TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Config.TimeValue()));
-                else
-                    timerThread.Change(TimeSpan.FromSeconds(0), TimeSpan.FromMinutes(Config.TimeValue()));
+                ExecCmd();
             }
             catch (Exception ex)
             {
@@ -103,16 +100,23 @@ namespace GitAutoFetch
             }
         }
 
-        private async void ExecCmd(object state)
+        private async void ExecCmd()
         {
             try
             {
-                DTE dte = await package.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) as DTE;
-
-                if (dte != null && dte.Solution.IsOpen)
+                while (true)
                 {
-                    string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
-                    dte.ExecuteCommand("Team.Git.Fetch");
+                    if (DisposeGit)
+                        break;
+
+                    DTE dte = await package.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) as DTE;
+
+                    if (dte != null && dte.Solution.IsOpen)
+                    {
+                        string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
+                        dte.ExecuteCommand("Team.Git.Fetch");
+                    }
+                    Thread.Sleep(TimeSpan.FromMinutes(Config.TimeValue()));
                 }
             }
             catch (Exception ex)
@@ -123,7 +127,7 @@ namespace GitAutoFetch
 
         public static void Dispose()
         {
-            timerThread?.Dispose();
+            DisposeGit = true;
         }
     }
 }

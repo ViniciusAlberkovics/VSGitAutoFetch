@@ -63,6 +63,9 @@ namespace GitAutoFetch
             try
             {
                 await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                    AutoFetch.Dispose();
                 Opened();
             }
             catch (Exception ex)
