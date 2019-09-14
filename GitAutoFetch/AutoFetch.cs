@@ -104,17 +104,20 @@ namespace GitAutoFetch
         {
             try
             {
-                while (true)
+                while (!DisposeGit)
                 {
-                    if (DisposeGit)
-                        break;
-
                     DTE dte = await package.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) as DTE;
 
                     if (dte != null && dte.Solution.IsOpen)
                     {
-                        string solutionDir = Path.GetDirectoryName(dte.Solution.FullName);
-                        dte.ExecuteCommand("Team.Git.Fetch");
+                        try
+                        {
+                            dte.ExecuteCommand("Team.Git.Fetch");
+                        }
+                        catch (Exception)
+                        {
+                            break;
+                        }
                     }
                     Thread.Sleep(TimeSpan.FromMinutes(Config.TimeValue()));
                 }
