@@ -26,7 +26,7 @@ namespace GitAutoFetch
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
-        private static Config Config;
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenConfig"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -57,7 +57,7 @@ namespace GitAutoFetch
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static async Task InitializeAsync(AsyncPackage package, Config conf)
+        public static async Task InitializeAsync(AsyncPackage package)
         {
             // Switch to the main thread - the call to AddCommand in OpenConfig's constructor requires
             // the UI thread.
@@ -65,7 +65,6 @@ namespace GitAutoFetch
 
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new OpenConfig(package, commandService);
-            Config = conf;
         }
 
         /// <summary>
@@ -80,7 +79,8 @@ namespace GitAutoFetch
             ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
-                Config.OpenConfigFile();
+                Config.Instance.OpenConfigFile();
+                _ = Config.Instance.VerifyConfigAsync();
             }
             catch (Exception ex)
             {

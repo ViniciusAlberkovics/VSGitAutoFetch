@@ -78,12 +78,11 @@ namespace GitAutoFetch
         {
             try
             {
-                Config config = new Config(0);
                 JoinableTaskFactory.RunAsync(async () =>
                 {
-                    await Config.VerifyConfigAsync(config);
-                    await AutoFetch.InitializeAsync(this, config);
-                    await OpenConfig.InitializeAsync(this, config);
+                    await Config.Instance.VerifyConfigAsync();
+                    await AutoFetch.InitializeAsync(this);
+                    await OpenConfig.InitializeAsync(this);
                 });
             }
             catch (Exception ex)

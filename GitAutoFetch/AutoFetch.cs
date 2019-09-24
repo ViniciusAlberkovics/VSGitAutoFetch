@@ -24,7 +24,6 @@ namespace GitAutoFetch
         /// </summary>
         private readonly AsyncPackage package;
         private static bool DisposeGit;
-        private static Config Config;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoFetch"/> class.
@@ -60,14 +59,13 @@ namespace GitAutoFetch
         /// Initializes the singleton instance of the command.
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
-        public static async Task InitializeAsync(AsyncPackage package, Config conf)
+        public static async Task InitializeAsync(AsyncPackage package)
         {
             // Switch to the main thread - the call to AddCommand in AutoFetch's constructor requires
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
             Instance = new AutoFetch(package, commandService);
-            Config = conf;
             Instance.Execute(null, null);
         }
 
@@ -84,7 +82,7 @@ namespace GitAutoFetch
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
 
-                ExecCmd();
+                _ = ExecFetchAsync();
             }
             catch (Exception ex)
             {
@@ -100,7 +98,7 @@ namespace GitAutoFetch
             }
         }
 
-        private async void ExecCmd()
+        private async Task ExecFetchAsync()
         {
             try
             {
@@ -119,7 +117,7 @@ namespace GitAutoFetch
                             break;
                         }
                     }
-                    Thread.Sleep(TimeSpan.FromMinutes(Config.TimeValue()));
+                    Thread.Sleep(TimeSpan.FromMinutes(Config.Instance.TimeValue()));
                 }
             }
             catch (Exception ex)

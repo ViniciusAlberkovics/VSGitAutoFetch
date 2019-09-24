@@ -10,23 +10,32 @@ namespace GitAutoFetch
     {
         private const int DefaultTime = 5;
         public int UserTime { get; set; }
+        private static Config _CurrentInstance;
 
-        public Config(int userTime)
+        private Config() { }
+
+        public static Config Instance
         {
-            UserTime = userTime;
+            get
+            {
+                if (_CurrentInstance == null)
+                    _CurrentInstance = new Config();
+
+                return _CurrentInstance;
+            }
         }
 
         public int TimeValue()
         {
-            return UserTime > 0 ? UserTime : DefaultTime;
+            return _CurrentInstance.UserTime > 0 ? _CurrentInstance.UserTime : DefaultTime;
         }
 
-        public static string ReturnPath()
+        public string ReturnPath()
         {
-            return $@"C:\Users\{Environment.UserName}\Documents\VsGitAutoFetch.json";
+            return $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\VsGitAutoFetch.json";
         }
 
-        public static async Task VerifyConfigAsync(Config config)
+        public async Task VerifyConfigAsync()
         {
             string pathConfig = ReturnPath();
 
@@ -34,20 +43,20 @@ namespace GitAutoFetch
             {
                 using (var r = new StreamReader(pathConfig))
                 {
-                    config = JsonConvert.DeserializeObject<Config>(await r.ReadToEndAsync());
+                    _CurrentInstance = JsonConvert.DeserializeObject<Config>(await r.ReadToEndAsync());
                 }
             }
             else
             {
                 using (var w = new StreamWriter(pathConfig))
                 {
-                    string conf = JsonConvert.SerializeObject(config, Formatting.Indented);
+                    string conf = JsonConvert.SerializeObject(_CurrentInstance, Formatting.Indented);
                     await w.WriteAsync(conf);
                 }
             }
         }
 
-        public static void OpenConfigFile()
+        public void OpenConfigFile()
         {
             string pathConfig = ReturnPath();
 
@@ -68,5 +77,6 @@ namespace GitAutoFetch
                 throw new Exception("Configuration file not existing.\nClick first on Git AutoFetching");
             }
         }
+
     }
 }
