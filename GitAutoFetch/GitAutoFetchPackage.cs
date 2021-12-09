@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Task = System.Threading.Tasks.Task;
+using System.Threading.Tasks;
 
 namespace GitAutoFetch
 {
@@ -34,16 +34,17 @@ namespace GitAutoFetch
         /// GitAutoFetchPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "a0b3344d-e011-4159-8052-c8eed06bc3ab";
+
         #region Package Members
 
         public GitAutoFetchPackage()
         {
             try
             {
-                JoinableTaskFactory.RunAsync(async () =>
-                    {
-                        await InitializeAsync(this.DisposalToken, null);
-                    });
+                _ = JoinableTaskFactory.RunAsync(async () =>
+                {
+                    await InitializeAsync(DisposalToken, null);
+                });
             }
             catch (Exception ex)
             {
@@ -62,10 +63,11 @@ namespace GitAutoFetch
         {
             try
             {
-                await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-                
+                await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
                 if (cancellationToken.IsCancellationRequested)
                     AutoFetch.Dispose();
+
                 Opened();
             }
             catch (Exception ex)
@@ -78,7 +80,7 @@ namespace GitAutoFetch
         {
             try
             {
-                JoinableTaskFactory.RunAsync(async () =>
+                _ = JoinableTaskFactory.RunAsync(async () =>
                 {
                     await Config.Instance.VerifyConfigAsync();
                     await AutoFetch.InitializeAsync(this);
@@ -91,6 +93,6 @@ namespace GitAutoFetch
             }
         }
 
-        #endregion
+        #endregion Package Members
     }
 }

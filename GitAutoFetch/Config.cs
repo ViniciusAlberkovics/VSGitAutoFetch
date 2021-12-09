@@ -12,7 +12,8 @@ namespace GitAutoFetch
         public int UserTime { get; set; }
         private static Config _CurrentInstance;
 
-        private Config() { }
+        private Config()
+        { }
 
         public static Config Instance
         {
@@ -25,10 +26,9 @@ namespace GitAutoFetch
             }
         }
 
-        public int TimeValue()
-        {
-            return _CurrentInstance.UserTime > 0 ? _CurrentInstance.UserTime : DefaultTime;
-        }
+        public int TimeValue() => _CurrentInstance.UserTime > 0 ? _CurrentInstance.UserTime : DefaultTime;
+
+        public TimeSpan TimeValue_TimeSpan() => TimeSpan.FromMinutes(TimeValue());
 
         public string ReturnPath()
         {
@@ -77,6 +77,5 @@ namespace GitAutoFetch
                 throw new Exception("Configuration file not existing.\nClick first on Git AutoFetching");
             }
         }
-
     }
 }
