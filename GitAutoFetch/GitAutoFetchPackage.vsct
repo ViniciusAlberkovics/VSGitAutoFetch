@@ -2,12 +2,12 @@
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <Extern href="stdidcmd.h" />
   <Extern href="vsshlids.h" />
-  
+
   <Commands package="guidGitAutoFetchPackage">
 
     <Groups>
       <Group guid="guidGitAutoFetchPackageCmdSet" id="MyMenuGroup" priority="0x0300">
-          <Parent guid="guidSHLMainMenu" id="IDM_VS_MNUCTRL_FILTERSOLUTIONEXPLORER" />
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MNUCTRL_FILTERSOLUTIONEXPLORER" />
       </Group>
       <Group guid="guidGitAutoFetchPackageCmdSet1" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MNUCTRL_FILTERSOLUTIONEXPLORER" />
@@ -48,12 +48,12 @@
     <GuidSymbol name="guidImages" value="{2dd168c0-544c-45df-ad6b-1ba3a2258652}">
       <IDSymbol name="bmpReload" value="1" />
     </GuidSymbol>
-  
+
     <GuidSymbol value="{cea955db-8ff6-4187-bace-580312a3f1d3}" name="guidGitAutoFetchPackageCmdSet1">
       <IDSymbol value="4128" name="MyMenuGroup" />
       <IDSymbol value="256" name="OpenConfigId" />
     </GuidSymbol>
-  
+
     <GuidSymbol value="{1d5b6d8b-064e-4ac2-b921-09104b772107}" name="guidImages1">
       <IDSymbol name="bmpConfiguration" value="1" />
     </GuidSymbol>
