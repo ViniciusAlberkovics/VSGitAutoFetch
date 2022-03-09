@@ -3,9 +3,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
-using System.IO;
-using Task = System.Threading.Tasks.Task;
-using Thread = System.Threading.Thread;
+using System.Threading.Tasks;
 
 namespace GitAutoFetch
 {
@@ -15,14 +13,17 @@ namespace GitAutoFetch
     internal sealed class AutoFetch
     {
         public const int CommandId = 0x0100;
+
         /// <summary>
         /// Command menu group (command set GUID).
         /// </summary>
         public static readonly Guid CommandSet = new Guid("1963cd03-55e3-41de-b505-6965e7873f22");
+
         /// <summary>
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
+
         private static bool DisposeGit;
 
         /// <summary>
@@ -37,23 +38,14 @@ namespace GitAutoFetch
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             CommandID menuCommandID = new CommandID(CommandSet, CommandId);
-            MenuCommand menuItem = new MenuCommand(this.Execute, menuCommandID);
+            MenuCommand menuItem = new MenuCommand(Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
 
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static AutoFetch Instance
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider => this.package;
+        public static AutoFetch Instance { get; private set; }
 
         /// <summary>
         /// Initializes the singleton instance of the command.
@@ -64,7 +56,9 @@ namespace GitAutoFetch
             // Switch to the main thread - the call to AddCommand in AutoFetch's constructor requires
             // the UI thread.
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+
             Instance = new AutoFetch(package, commandService);
             Instance.Execute(null, null);
         }
@@ -86,14 +80,7 @@ namespace GitAutoFetch
             }
             catch (Exception ex)
             {
-                VsShellUtilities.ShowMessageBox(
-                    this.package,
-                    ex.Message,
-                    "VS Git AutoFetch -> Error",
-                    OLEMSGICON.OLEMSGICON_CRITICAL,
-                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-
+                VsShellUtilities.ShowMessageBox(package, ex.Message, "VS Git AutoFetch -> Error", OLEMSGICON.OLEMSGICON_CRITICAL, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
                 Dispose();
             }
         }
@@ -104,9 +91,7 @@ namespace GitAutoFetch
             {
                 while (!DisposeGit)
                 {
-                    DTE dte = await package.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) as DTE;
-
-                    if (dte != null && dte.Solution.IsOpen)
+                    if (await package.GetServiceAsync(typeof(DTE)).ConfigureAwait(false) is DTE dte && dte.Solution.IsOpen)
                     {
                         try
                         {
@@ -117,7 +102,8 @@ namespace GitAutoFetch
                             break;
                         }
                     }
-                    Thread.Sleep(TimeSpan.FromMinutes(Config.Instance.TimeValue()));
+
+                    await Task.Delay(Config.Instance.TimeValue_TimeSpan());
                 }
             }
             catch (Exception ex)

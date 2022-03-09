@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
-using System.Globalization;
 using Task = System.Threading.Tasks.Task;
 
 namespace GitAutoFetch
@@ -26,7 +25,7 @@ namespace GitAutoFetch
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenConfig"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -39,7 +38,7 @@ namespace GitAutoFetch
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandID);
+            var menuItem = new MenuCommand(Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
 
@@ -47,11 +46,6 @@ namespace GitAutoFetch
         /// Gets the instance of the command.
         /// </summary>
         public static OpenConfig Instance { get; private set; }
-
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider => this.package;
 
         /// <summary>
         /// Initializes the singleton instance of the command.
@@ -77,6 +71,7 @@ namespace GitAutoFetch
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
+
             try
             {
                 Config.Instance.OpenConfigFile();
@@ -84,13 +79,7 @@ namespace GitAutoFetch
             }
             catch (Exception ex)
             {
-                VsShellUtilities.ShowMessageBox(
-                    this.package,
-                    ex.Message,
-                    "VS Git AutoFetch -> Error",
-                    OLEMSGICON.OLEMSGICON_WARNING,
-                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                VsShellUtilities.ShowMessageBox(package, ex.Message, "VS Git AutoFetch -> Error", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
             }
         }
     }
