@@ -39,17 +39,10 @@ namespace GitAutoFetch
 
         public GitAutoFetchPackage()
         {
-            try
+            _ = JoinableTaskFactory.RunAsync(async () =>
             {
-                _ = JoinableTaskFactory.RunAsync(async () =>
-                {
-                    await InitializeAsync(DisposalToken, null);
-                });
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                await InitializeAsync(DisposalToken, null);
+            });
         }
 
         /// <summary>
@@ -61,36 +54,22 @@ namespace GitAutoFetch
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            try
-            {
-                await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-                if (cancellationToken.IsCancellationRequested)
-                    AutoFetch.Dispose();
+            if (cancellationToken.IsCancellationRequested)
+                AutoFetch.Dispose();
 
-                Opened();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Opened();
         }
 
         public void Opened()
         {
-            try
+            _ = JoinableTaskFactory.RunAsync(async () =>
             {
-                _ = JoinableTaskFactory.RunAsync(async () =>
-                {
-                    await Config.Instance.VerifyConfigAsync();
-                    await AutoFetch.InitializeAsync(this);
-                    await OpenConfig.InitializeAsync(this);
-                });
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                await Config.Instance.VerifyConfigAsync();
+                await AutoFetch.InitializeAsync(this);
+                await OpenConfig.InitializeAsync(this);
+            });
         }
 
         #endregion Package Members
