@@ -78,6 +78,7 @@
   <ItemGroup>
     <VSCTCompile Include="..\SharedFiles\GitAutoFetchPackage.vsct">
       <Link>GitAutoFetchPackage.vsct</Link>
+      <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
     <Content Include="..\SharedFiles\Logo.png">
       <Link>Logo.png</Link>

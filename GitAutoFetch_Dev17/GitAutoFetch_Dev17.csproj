@@ -73,11 +73,14 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.1.4054" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\SharedFiles\GitAutoFetchPackage.vsct">
+    <VSCTCompile Include="..\SharedFiles\GitAutoFetchPackage.vsct">
       <Link>GitAutoFetchPackage.vsct</Link>
-    </Content>
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
     <Content Include="..\SharedFiles\Logo.png">
       <Link>Logo.png</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\SharedFiles\Resources\cogwheel.png">
       <Link>Resources\cogwheel.png</Link>
