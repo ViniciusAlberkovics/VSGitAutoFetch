@@ -10,7 +10,8 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
-  </PropertyGroup><Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -81,29 +82,12 @@
     <Content Include="..\SharedFiles\Resources\cogwheel.png">
       <Link>Resources\cogwheel.png</Link>
     </Content>
-    <Content Include="..\SharedFiles\Resources\Git-Image.png">
-      <Link>Resources\Git-Image.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\Resources\Logo.png">
-      <Link>Resources\Logo.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\Resources\Logo.xml">
-      <Link>Resources\Logo.xml</Link>
-    </Content>
-    <Content Include="..\SharedFiles\Resources\Logo128x128.png">
-      <Link>Resources\Logo128x128.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\Resources\Reload-Image.png">
-      <Link>Resources\Reload-Image.png</Link>
-    </Content>
     <Content Include="..\SharedFiles\Resources\reload.png">
       <Link>Resources\reload.png</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SharedProject\AssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
-    </Compile>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="..\SharedProject\SharedProject.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
